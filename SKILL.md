@@ -45,7 +45,7 @@ Do not create or rename the final product folder before the user approves the co
 
 ## Runtime Environment Check
 
-Before starting the first product task in a new environment:
+Handle the runtime check internally before starting the first product task in a new environment. Do not ask the user to run environment commands or explain Python/Pillow setup unless automatic setup fails.
 
 1. Confirm that Python 3.10 or newer is available.
 2. Install the dependencies from `requirements.txt` when they are missing.
@@ -54,7 +54,16 @@ Before starting the first product task in a new environment:
 
 The required local Python dependency is Pillow. Installing or copying the Skill directory alone does not install this runtime dependency.
 
-If Python or Pillow cannot be installed, stop and tell the user that image generation may continue only if they accept that the required stitching and compression delivery steps cannot be completed. Do not silently skip those final delivery steps.
+If automatic setup fails, stop before image generation and give the user one concise failure reason. Do not silently skip the stitching or compression steps, and do not ask the user to decide whether to continue with an incomplete delivery workflow.
+
+## Required Image Model
+
+- Every image-generation and image-editing operation must use `gpt-image-2`.
+- This is a mandatory requirement, not a default or preference.
+- Confirm that `gpt-image-2` is available before generating the hero image.
+- Never substitute or silently fall back to another image model.
+- If `gpt-image-2` is unavailable or cannot be selected, stop before image generation and tell the user concisely.
+- Planning, spreadsheet processing, compositing, stitching, compression, previewing, and file organization may use appropriate non-image tools.
 
 ## Required Input Collection
 
@@ -121,16 +130,16 @@ Generate or adjust only:
 4. Use `product_fidelity: exact_product` by default.
 5. Generate the fixed delivery set: one `960 x 540 px` hero image plus six detail-page slices.
 6. For exact product fidelity, prefer this production method when available:
-   - Generate background/layout and text-safe areas with GPT Image 2.
+   - Generate background/layout and text-safe areas with `gpt-image-2`.
    - Keep the original product photo/crop as the product layer.
    - Composite the original product layer into the generated layout when exact label/package text matters.
 7. Follow the mandatory preview gates: hero approval, slice `01` direction approval, automatic generation of slices `02` through `06`, then complete-detail-page approval.
-8. If using GPT Image 2 edits directly, include strict prompt language that the product and product-owned text must remain unchanged. Reject outputs that alter label text, logo, package copy, buttons, colors, or packaging structure.
+8. When using `gpt-image-2` edits directly, include strict prompt language that the product and product-owned text must remain unchanged. Reject outputs that alter label text, logo, package copy, buttons, colors, or packaging structure.
 9. Save temporary outputs with clear filenames. Open previews only for the hero, detail slice `01`, and the stitched complete detail page by default. Ask for final naming information only after the complete-detail-page approval.
 
 ## Defaults
 
-- Model: `gpt-image-2`.
+- Required image model: `gpt-image-2`. This is mandatory and cannot be replaced by another image model.
 - Hero size: `960x540`.
 - Detail slices: exactly 6 standalone vertical posters. Generate one slice at a time and keep final delivery slices as PNG. Compress each final delivery slice under `500KB` when possible without changing the layout.
 - Detail long image: stitch the 6 internally reviewed slices vertically into a true long detail page PNG, then request approval of the complete page.
