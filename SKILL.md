@@ -11,11 +11,18 @@ For one product, the required output is exactly:
 
 - One hero image: `960 x 540 px`.
 - Six detail-page slice images: `01` to `06`, generated one by one. Each slice must be under `500KB` after delivery compression.
-- One stitched complete detail page made only after all six slices are generated and confirmed.
+- One stitched complete detail page made after all six slices are generated and pass internal review.
 
-Do not generate all images in one batch. Generate and verify the hero first, then generate detail slices `01` through `06` sequentially. After the hero image is generated, copy a preview file to the skill folder's preview/output area, open the preview file for the user to inspect, and explicitly ask whether the hero image is approved before generating detail-page slices. Detail-page slices do not require user confirmation one by one unless the user asks for that review mode; generate all remaining detail slices sequentially, then summarize the completed detail-page output for the user. If any generated image changes the product, misses the required content, repeats the same scene/viewpoint, or exceeds delivery constraints, stop and regenerate that image before moving to the next one.
+Do not generate all images in one batch. Use this mandatory confirmation flow:
 
-After all images are generated, show/describe the sequence to the user and ask for confirmation. Only after user confirmation, ask for the product name and product code, then create the final folder named:
+1. Generate the hero image, save it to the preview/output area, open the hero preview window, report the preview file path, and stop for explicit user approval.
+2. After hero approval, generate detail slice `01`, open its preview window, report its file path, and stop for explicit approval of the detail-page direction.
+3. After slice `01` is approved, generate detail slices `02` through `06` sequentially. Do not open a preview window or ask for confirmation after each of these slices. Continue automatically unless a slice fails the internal review requirements.
+4. After all six slices pass internal review, stitch the complete detail page, open the complete-detail-page preview window, report its file path, summarize the six-slice sequence, and stop for final visual approval.
+
+If any generated image changes the product, misses required content, repeats the same scene/viewpoint, or exceeds delivery constraints, stop that generation sequence and regenerate the failed image before moving on.
+
+Only after the user approves the complete detail page, proactively ask for the product name, product code, and any special folder-naming requirement. If the user has no special requirement, create the final folder named:
 
 ```text
 商品编码_商品名称
@@ -34,7 +41,20 @@ The final product folder must contain:
 详情页切片06.png
 ```
 
-Do not create the final product folder or archive files before the user confirms all generated images.
+Do not create or rename the final product folder before the user approves the complete detail page and provides the required naming information.
+
+## Runtime Environment Check
+
+Before starting the first product task in a new environment:
+
+1. Confirm that Python 3.10 or newer is available.
+2. Install the dependencies from `requirements.txt` when they are missing.
+3. Run `python scripts/check_environment.py` or the platform-equivalent Python command.
+4. Do not claim that the workflow is ready until the environment check exits successfully.
+
+The required local Python dependency is Pillow. Installing or copying the Skill directory alone does not install this runtime dependency.
+
+If Python or Pillow cannot be installed, stop and tell the user that image generation may continue only if they accept that the required stitching and compression delivery steps cannot be completed. Do not silently skip those final delivery steps.
 
 ## Required Input Collection
 
@@ -104,16 +124,16 @@ Generate or adjust only:
    - Generate background/layout and text-safe areas with GPT Image 2.
    - Keep the original product photo/crop as the product layer.
    - Composite the original product layer into the generated layout when exact label/package text matters.
-7. Generate each detail slice separately and sequentially, then stitch them only after all slices pass review and the user confirms.
+7. Follow the mandatory preview gates: hero approval, slice `01` direction approval, automatic generation of slices `02` through `06`, then complete-detail-page approval.
 8. If using GPT Image 2 edits directly, include strict prompt language that the product and product-owned text must remain unchanged. Reject outputs that alter label text, logo, package copy, buttons, colors, or packaging structure.
-9. Save temporary outputs with clear filenames. Ask the user to confirm all images before creating the final `商品编码_商品名称` folder and moving files into the final delivery structure.
+9. Save temporary outputs with clear filenames. Open previews only for the hero, detail slice `01`, and the stitched complete detail page by default. Ask for final naming information only after the complete-detail-page approval.
 
 ## Defaults
 
 - Model: `gpt-image-2`.
 - Hero size: `960x540`.
 - Detail slices: exactly 6 standalone vertical posters. Generate one slice at a time and keep final delivery slices as PNG. Compress each final delivery slice under `500KB` when possible without changing the layout.
-- Detail long image: stitch the 6 confirmed slices vertically into a true long detail page PNG.
+- Detail long image: stitch the 6 internally reviewed slices vertically into a true long detail page PNG, then request approval of the complete page.
 - Audience: 中老年银发群体 unless the user says otherwise.
 - Style: warm, clear, trustworthy, practical, large readable Chinese text, simple hierarchy, low visual noise.
 - Hero image: product-first composition, simple headline/subheadline, no dense text.
@@ -124,7 +144,7 @@ Generate or adjust only:
 
 ## Six-Slice Detail Page Structure
 
-Use this exact six-slice structure for enriched detail pages. Each item must be generated as one separate vertical image, reviewed, then stacked vertically after confirmation:
+Use this exact six-slice structure for enriched detail pages. Each item must be generated as one separate vertical image and internally reviewed. After slice `01` direction approval, slices `02` through `06` do not require individual user confirmation; stack all six and request approval of the complete page:
 
 1. 详情页切片01 - 商品总览与核心卖点: large exact product view, product name if provided, one short value proposition, and 2-3 strongest supported selling points.
 2. 详情页切片02 - 使用场景与卖点呈现: a practical lifestyle scene with changed camera angle/framing from the hero, showing how the product is used.
@@ -369,7 +389,7 @@ Reject and regenerate if:
 ## Batch Output Rules
 
 - Generate one `960x540` hero image and exactly six detail slices per product by default.
-- Stitch six confirmed detail slices into one true long page after generation; do not rely on one image-generation call for the whole long page.
+- Stitch six internally reviewed detail slices into one true long page after generation; do not rely on one image-generation call for the whole long page.
 - Export compressed delivery files: every detail slice under `500KB`, and the hero image under `500KB`.
 - Do not add a product name line if the product name is missing.
 - Do not invent specs. If the table says "按照图片上的信息来写", use only visibly present product information and safe category-level usage/storage fields.
