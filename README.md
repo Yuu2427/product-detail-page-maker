@@ -46,8 +46,7 @@ powershell -ExecutionPolicy ByPass -c "irm https://chatgpt.com/codex/install.ps1
 请安装并配置这个仓库：
 https://github.com/Yuu2427/product-detail-page-maker
 
-请安装为全局 Skill，并自动配置运行所需环境。
-完成后运行环境检查，不通过时继续修复。
+请安装为全局 Skill，并自动安装正常运行所需的内容。
 不要修改 SKILL.md 中的业务规则。
 最后只告诉我是否安装成功，以及是否需要重启应用。
 ```
@@ -64,7 +63,7 @@ npx skills add github:Yuu2427/product-detail-page-maker --global --agent codex -
 
 ```text
 请检查刚安装的 ecommerce-gpt-image2-pdp-high-fidelity Skill，
-自动配置运行环境并完成环境检查。
+自动安装正常运行所需的内容。
 最后只告诉我是否可以正常使用。
 ```
 
@@ -73,7 +72,7 @@ npx skills add github:Yuu2427/product-detail-page-maker --global --agent codex -
 将完整 Skill 文件夹发给对方，让对方用 Trae Solo 打开并发送：
 
 ```text
-请将当前文件夹安装为全局 Skill，自动配置运行环境并完成环境检查。
+请将当前文件夹安装为全局 Skill，并自动安装正常运行所需的内容。
 不要修改 SKILL.md 中的业务规则。
 最后只告诉我是否安装成功，以及是否需要重启应用。
 ```
@@ -83,5 +82,3 @@ npx skills add github:Yuu2427/product-detail-page-maker --global --agent codex -
 ## 使用
 
 请查看 [`使用说明.md`](使用说明.md)。
-
-遇到安装问题时，再查看 [`环境安装说明.md`](环境安装说明.md)。
